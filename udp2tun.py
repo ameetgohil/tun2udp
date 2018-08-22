@@ -27,6 +27,8 @@ fcntl.ioctl(f, TUNSETOWNER, 1000)
 subprocess.call('ip link set dev tun2udp' + str(0) + ' up', shell=True)
 subprocess.call('ip addr add 10.0.0.1/24 dev tun2udp' + str(0), shell=True)
 subprocess.call('sysctl -w net.ipv4.ip_forward=1', shell=True)
+subprocess.call('iptables -t nat --flush')
+subprocess.call('iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE', shell=True)
 
 
 s = socket(AF_INET, SOCK_DGRAM)
