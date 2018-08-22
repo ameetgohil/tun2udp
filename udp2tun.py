@@ -27,12 +27,14 @@ fcntl.ioctl(f, TUNSETOWNER, 1000)
 subprocess.call('ip link set dev tun2udp' + str(0) + ' up', shell=True)
 subprocess.call('ip addr add 10.0.0.1/24 dev tun2udp' + str(0), shell=True)
 subprocess.call('sysctl -w net.ipv4.ip_forward=1', shell=True)
-subprocess.call('iptables -t nat --flush')
+subprocess.call('iptables -t nat --flush', shell=True)
 subprocess.call('iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE', shell=True)
 
 
 s = socket(AF_INET, SOCK_DGRAM)
-s.bind(('192.168.0.24', PORT))
+s.bind(('192.168.1.87', PORT))
+
+s_tx = socket(AF_INET, SOCK_DGRAM)
 
 
 while 1:
@@ -49,7 +51,9 @@ while 1:
         #    buf = buf[:0x18] + icmp_req[0x18] + icmp_req[0x19] + buf[20:]
         #    print icmp_req.encode("hex")
         #    os.write(f, icmp_req)
-#    else:
-        
+    else:
+#        print "here"
+        message = os.read(f, 1500)
+        s_tx.sendto(message,('192.168.1.69', 1235))
 
 time.sleep(100)
