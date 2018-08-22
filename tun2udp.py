@@ -25,19 +25,26 @@ fcntl.ioctl(f, TUNSETIFF, ifr)
 fcntl.ioctl(f, TUNSETOWNER, 1000)
 
 subprocess.call('ip link set dev tun2udp' + str(0) + ' up', shell=True)
-subprocess.call('ip addr add 10.0.0.1/24 dev tun2udp' + str(0), shell=True)
+subprocess.call('ip addr add 10.0.0.2/24 dev tun2udp' + str(0), shell=True)
+
+subprocess.call('ip route add default via 10.0.0.2', shell=True)
 
 s = socket(AF_INET, SOCK_DGRAM)
 #s.bind(("", PORT))
 
+s_rx = socket(AF_INET, SOCK_DGRAM)
+s_rx.bind(('192.168.1.69', 1235))
 
 while 1:
-    r = select([f,s],[],[])[0][0]
+    r = select([f,s_rx],[],[])[0][0]
     if r == f:
         message = os.read(f,1500)
-        os.write(1,message)
-        s.sendto(message,('127.0.0.1', 1234))
-
-        
+#        os.write(1,message)
+        s.sendto(message,('192.168.1.87', 1234))
+#        print "r"
+    else:
+        buf,p = s_rx.recvfrom(1500)
+        os.write(f,buf)
+#        print "s_rx"
 
 time.sleep(100)
